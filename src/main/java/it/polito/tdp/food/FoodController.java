@@ -5,9 +5,19 @@
 package it.polito.tdp.food;
 
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.food.db.DBConnect;
+import it.polito.tdp.food.model.Food;
+import it.polito.tdp.food.model.FoodGrassi;
 import it.polito.tdp.food.model.Model;
+import it.polito.tdp.food.model.Portion;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -41,7 +51,7 @@ public class FoodController {
     private Button btnSimula; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxFood"
-    private ComboBox<?> boxFood; // Value injected by FXMLLoader
+    private ComboBox<FoodGrassi> boxFood; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtResult"
     private TextArea txtResult; // Value injected by FXMLLoader
@@ -49,13 +59,55 @@ public class FoodController {
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Creazione grafo...");
+    	txtResult.appendText("Creazione grafo...\n");
+    	try {
+    		int n =Integer.parseInt(txtPorzioni.getText());
+    		this.model.creaGrafo(n);
+    		txtResult.appendText("Grafo creato con successo!\n");
+    		txtResult.appendText("#Vertici: "+ this.model.getNVertici()+"\n");
+    		txtResult.appendText("#Archi: "+ this.model.getNArchi()+"\n");
+    		
+    		for(FoodGrassi f : this.model.getVertici(n))
+    		{
+    			boxFood.getItems().add(f);
+    		}
+    	
+    		
+			
+		} catch (NumberFormatException e) {
+			txtResult.appendText("Bisonga inserire un numero!");
+			return;
+			
+		}
     }
 
     @FXML
     void doGrassi(ActionEvent event) {
     	txtResult.clear();
     	txtResult.appendText("Analisi grassi...");
+    	
+    	if(this.model.grafoCreato())
+    	{
+    		for(FoodGrassi fg1: this.model.getMingrassi(boxFood.getValue()))
+    		{
+    			for(FoodGrassi fg2: this.model.getMingrassi(boxFood.getValue()))
+        		{
+    				if(fg1.getGrassi()<fg2.getGrassi())
+    				{
+    					txtResult.appendText(fg1.toString());
+    				}
+    				else 
+    				{
+    					txtResult.appendText(fg2.toString());
+    				}
+    					
+        		}
+    		}
+    	}
+    	else
+    	{
+    		txtResult.appendText("bisogna prima creare il grafo!");
+    	}
     }
 
     @FXML

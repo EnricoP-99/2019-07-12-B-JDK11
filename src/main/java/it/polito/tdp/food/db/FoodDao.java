@@ -9,6 +9,7 @@ import java.util.List;
 
 import it.polito.tdp.food.model.Condiment;
 import it.polito.tdp.food.model.Food;
+import it.polito.tdp.food.model.FoodGrassi;
 import it.polito.tdp.food.model.Portion;
 
 public class FoodDao {
@@ -107,6 +108,41 @@ public class FoodDao {
 			e.printStackTrace();
 			return null ;
 		}
+
+	}
+	
+	public List<FoodGrassi> getVertici(int n){
+		String sql = "SELECT f.food_code as id , f.display_name as name, AVG(p.saturated_fats) as grassi "
+				+ "FROM food f,portion p "
+				+ "WHERE f.food_code = p.food_code "
+				+ "GROUP BY id,name "
+				+ "HAVING COUNT(p.portion_id)>=? "
+				+ "ORDER BY name" ;
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			List<FoodGrassi> list = new ArrayList<>() ;
+
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setInt(1, n);
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) {
+				try {
+					list.add(new FoodGrassi(res.getInt("id"), res.getString("name"), res.getDouble("grassi")));
+					
+				} catch (Throwable t) {
+					t.printStackTrace();
+				}
+			}
+			
+			conn.close();
+			return list ;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null ;
+		}
+		
 
 	}
 }
